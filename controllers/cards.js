@@ -22,7 +22,7 @@ const createCard = async (req, res) => {
     });
     res.status(201).send(await card.save());
   } catch (err) {
-    if (err.errors.name.name === "ValidationError") {
+    if (err.name === "ValidationError") {
       res.status(400).send({
         message: "Переданы некорректные данные при создании карточки",
         ...err,
