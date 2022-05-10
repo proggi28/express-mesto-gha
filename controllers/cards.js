@@ -1,5 +1,4 @@
-const res = require("express/lib/response");
-const Card = require("../models/card");
+const Card = require('../models/card');
 
 const getCards = async (req, res) => {
   try {
@@ -7,8 +6,7 @@ const getCards = async (req, res) => {
     res.status(200).send(cards);
   } catch (err) {
     res.status(500).send({
-      message: "Произошла ошибка на сервере",
-      err,
+      message: 'Произошла ошибка на сервере',
     });
   }
 };
@@ -22,15 +20,14 @@ const createCard = async (req, res) => {
     });
     res.status(201).send(await card.save());
   } catch (err) {
-    if (err.name === "ValidationError") {
+    if (err.name === 'ValidationError') {
       res.status(400).send({
-        message: "Переданы некорректные данные при создании карточки",
-        ...err,
+        message: 'Переданы некорректные данные при создании карточки',
       });
+      return;
     }
     res.status(500).send({
-      message: "Произошла ошибка в работе сервера",
-      err,
+      message: 'Произошла ошибка в работе сервера',
     });
   }
 };
@@ -38,99 +35,91 @@ const createCard = async (req, res) => {
 const deleteCardById = async (req, res) => {
   try {
     const cardById = await Card.findByIdAndRemove(req.params.cardId);
-    if(!cardById) {
-      const error = new Error('Пользователь по заданному id отсутствует в базе');
+    if (!cardById) {
+      const error = new Error('Карточка не найдена');
       error.statusCode = 404;
       throw error;
     }
     res.status(200).send(cardById);
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === 'CastError') {
       res.status(400).send({
-        message: "Карточка с указанным id не найдена",
-        err,
+        message: 'Переданы некорректные данные',
       });
       return;
     }
     if (err.statusCode === 404) {
       res.status(404).send({
-        message: "Переданы некорректные данные",
-        err,
+        message: 'Карточка не найдена',
       });
       return;
     }
     res.status(500).send({
-      message: "Произошла ошибка на сервере",
-      err,
+      message: 'Произошла ошибка на сервере',
     });
-    return;
   }
 };
 
 const likeCard = async (req, res) => {
   try {
-    const likeCard = await Card.findByIdAndUpdate(
+    const addLikeCard = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-      { new: true }
-    ); if(!likeCard) {
-      const error = new Error('Пользователь по заданному id отсутствует в базе');
+      { new: true },
+    );
+    if (!addLikeCard) {
+      const error = new Error('Карточка не найдена');
       error.statusCode = 404;
       throw error;
     }
-    res.status(200).send(likeCard);
+    res.status(200).send(addLikeCard);
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === 'CastError') {
       res.status(400).send({
-        message: "Переданы некорректные данные для постановки лайка",
-        ...err,
+        message: 'Переданы некорректные данные для постановки лайка',
       });
       return;
     }
     if (err.statusCode === 404) {
       res.status(404).send({
-        message: "Передан несуществующий id карточки",
-        err,
+        message: 'Карточка не найдена',
       });
       return;
     }
     res.status(500).send({
-      message: "Произошла ошибка на сервере",
-      err,
+      message: 'Произошла ошибка на сервере',
     });
   }
 };
 
 const dislikeCard = async (req, res) => {
   try {
-    const dislikeCard = await Card.findByIdAndUpdate(
+    const addDislikeCard = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } }, // убрать _id из массива
-      { new: true }
-    ); if(!dislikeCard) {
-      const error = new Error('Пользователь по заданному id отсутствует в базе');
+      { new: true },
+    );
+    if (!addDislikeCard) {
+      const error = new Error('Карточка не найдена');
       error.statusCode = 404;
       throw error;
     }
-    res.status(200).send(dislikeCard);
+    res.status(200).send(addDislikeCard);
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === 'CastError') {
       res.status(400).send({
-        message: "Переданы некорректные данные для снятия лайка",
-        ...err,
+        message: 'Переданы некорректные данные для снятия лайка',
       });
       return;
     }
     if (err.statusCode === 404) {
       res.status(404).send({
-        message: "Передан несуществующий id карточки",
-        err,
+        message: 'Карточка не найдена',
       });
       return;
     }
     res.status(500).send({
-      message: "Произошла ошибка на сервере",
-      err,
+      message: 'Произошла ошибка на сервере"',
     });
   }
 };
