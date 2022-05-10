@@ -15,13 +15,23 @@ const getUsers = async (req, res) => {
 const getUserByID = async (req, res) => {
   try {
     const userById = await User.findById(req.params.userId);
+    if(!userById) {
+      const error = new Error('Пользователь по заданному id отсутствует в базе');
+      error.statusCode = 404;
+      throw error;
+    }
     res.status(200).send(userById);
   } catch (err) {
-    if (err.kind === "ObjectID") {
+    if (err.name === "CastError") {
       res.status(400).send({
-        message: "Пользователь по указанному id не найден",
+        message: 'Невалидный id пользователя',
         err,
       });
+      return;
+    }
+    if (err.statusCode === 404) {
+      res.status(404).send({ message: err.message });
+  return;
     }
     res.status(500).send({
       message: "Произошла ошибка на сервере",
@@ -33,10 +43,7 @@ const getUserByID = async (req, res) => {
 const createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
-    const user = new User(
-      { name, about, avatar },
-      { new: true, runValidators: true }
-    );
+    const user = new User({ name, about, avatar });
     res.status(201).send(await user.save());
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -67,7 +74,7 @@ const userUpdateProfile = async (req, res) => {
     );
     res.status(200).send(updateUser);
   } catch (err) {
-    if (err.errors.name.name === "ValidationError") {
+    if (err.name === "ValidationError") {
       res.status(400).send({
         message: "Переданы некорректные данные при обновлении профиля",
         ...err,
