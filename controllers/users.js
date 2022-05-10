@@ -33,14 +33,18 @@ const getUserByID = async (req, res) => {
 const createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
-    const user = new User({ name, about, avatar });
+    const user = new User(
+      { name, about, avatar },
+      { new: true, runValidators: true }
+    );
     res.status(201).send(await user.save());
   } catch (err) {
-    if (err.errors.name.name === "ValidationError") {
+    if (err.name === "ValidationError") {
       res.status(400).send({
         message: "Переданы некорректные данные при создании пользователя",
         ...err,
       });
+      return;
     }
     res.status(500).send({
       message: "Произошла ошибка в работе сервера",
@@ -68,11 +72,13 @@ const userUpdateProfile = async (req, res) => {
         message: "Переданы некорректные данные при обновлении профиля",
         ...err,
       });
+      return;
     } else if (err.kind === "ObjectID") {
       res.status(404).send({
         message: "Пользователь с указанным id не найден",
         err,
       });
+      return;
     }
     res.status(500).send({
       message: "Произошла ошибка в работе сервера",

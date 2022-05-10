@@ -15,8 +15,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/', (req, res) => {
+  res.send(req.body);
+});
 app.use("/users", usersRoutes);
 app.use("/cards", cardsRoutes);
+app.use((req, res, next) => {
+  next(res.status(404).send({ message: 'Страница не найдена' }));
+});
 
 async function main() {
   await mongoose.connect("mongodb://localhost:27017/mestodb", {
