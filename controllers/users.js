@@ -1,5 +1,12 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const JWT_SECRET = 'verylongpasswordoftheyandexpraktikumstudent';
+
+const SALT_ROUNDS = 10;
+
+// eslint-disable-next-line consistent-return
 const getUsers = async (req, res) => {
   try {
     const users = await User.find({});
@@ -15,9 +22,7 @@ const getUserByID = async (req, res) => {
   try {
     const userById = await User.findById(req.params.userId);
     if (!userById) {
-      const error = new Error(
-        'Пользователь по заданному id отсутствует в базе',
-      );
+      const error = new Error('Пользователь по заданному id отсутствует в базе');
       error.statusCode = 404;
       throw error;
     }
@@ -40,9 +45,18 @@ const getUserByID = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   try {
-    const user = new User({ name, about, avatar });
+    const hash = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = new User({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    });
     res.status(201).send(await user.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -54,6 +68,38 @@ const createUser = async (req, res) => {
     res.status(500).send({
       message: 'Произошла ошибка в работе сервера',
     });
+  }
+};
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400).send({ message: 'Неправильные логин или пароль' });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(401).send({ message: 'Неправильные логин или пароль' });
+    return;
+  }
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
+    res.status(401).send({ message: 'Неправильные логин или пароль' });
+    return;
+  }
+
+  const token = await jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+  res.status(200).send({ token });
+};
+
+// eslint-disable-next-line consistent-return
+const userProfile = async (req, res) => {
+  try {
+    const { name, about } = req.body;
+    await User.findById(req.user._id);
+    return res.status(200).send({ name, about });
+  } catch (err) {
+    return res.status(401).send({ message: 'Необходима авторизация' });
   }
 };
 
@@ -106,7 +152,8 @@ const userUpdateAvatar = async (req, res) => {
         message: 'Переданы некорректные данные при обновлении аватара',
       });
       return;
-    } if (err.name === 'CastError') {
+    }
+    if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Переданы некорректные данные',
       });
@@ -122,6 +169,8 @@ module.exports = {
   getUsers,
   getUserByID,
   createUser,
+  login,
+  userProfile,
   userUpdateProfile,
   userUpdateAvatar,
 };

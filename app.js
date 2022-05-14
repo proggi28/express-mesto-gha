@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { usersRoutes } = require('./routes/users');
 const { cardsRoutes } = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+// const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
@@ -15,8 +17,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// app.use(auth);
+app.post('/signin', express.json(), login);
+app.post('/signup', express.json(), createUser);
+
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
+
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не найдена' });
 });

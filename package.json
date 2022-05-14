@@ -23,10 +23,15 @@
     "eslint": "^8.15.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "prettier-eslint": "^14.0.3"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.18.1",
-    "mongoose": "^6.3.2"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.3.2",
+    "prettier": "^2.6.2",
+    "validator": "^13.7.0"
   }
 }
