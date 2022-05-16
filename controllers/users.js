@@ -6,6 +6,8 @@ const JWT_SECRET = 'verylongpasswordoftheyandexpraktikumstudent';
 
 const SALT_ROUNDS = 10;
 
+// const DUBLICATE_MONGOOSE_ERROR_CODE = 11000;
+
 // eslint-disable-next-line consistent-return
 const getUsers = async (req, res) => {
   try {
@@ -77,7 +79,7 @@ const login = async (req, res) => {
   if (!email || !password) {
     res.status(400).send({ message: 'Неправильные логин или пароль' });
   }
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select('+password');
   if (!user) {
     res.status(401).send({ message: 'Неправильные логин или пароль' });
     return;
@@ -95,11 +97,10 @@ const login = async (req, res) => {
 // eslint-disable-next-line consistent-return
 const userProfile = async (req, res) => {
   try {
-    const { name, about } = req.body;
-    await User.findById(req.user._id);
-    return res.status(200).send({ name, about });
+    const user = await User.findById(req.user._id);
+    return res.status(200).send(user);
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    res.status(401).send({ message: 'Необходима авторизация' });
   }
 };
 

@@ -11,6 +11,34 @@ const getCards = async (req, res) => {
   }
 };
 
+const deleteCardById = async (req, res) => {
+  try {
+    const card = await Card.findById(req.params.cardId);
+    if (!card.owner.equals(req.user._id)) {
+      res.status(403).send({ message: 'Нельзя удалять чужие карточки' });
+      return;
+    }
+    const cardDelById = await Card.findByIdAndRemove(req.params.cardId);
+    res.status(200).send(cardDelById);
+  } catch (err) {
+    if (err.name === 'CastError') {
+      res.status(400).send({
+        message: 'Переданы некорректные данные',
+      });
+      return;
+    }
+    if (err.statusCode === 404) {
+      res.status(404).send({
+        message: 'Карточка не найдена',
+      });
+      return;
+    }
+    res.status(500).send({
+      message: 'Произошла ошибка на сервере',
+    });
+  }
+};
+
 const createCard = async (req, res) => {
   try {
     const card = new Card({
@@ -28,34 +56,6 @@ const createCard = async (req, res) => {
     }
     res.status(500).send({
       message: 'Произошла ошибка в работе сервера',
-    });
-  }
-};
-
-const deleteCardById = async (req, res) => {
-  try {
-    const cardById = await Card.findByIdAndRemove(req.params.cardId);
-    if (!cardById) {
-      const error = new Error('Карточка не найдена');
-      error.statusCode = 404;
-      throw error;
-    }
-    res.status(200).send(cardById);
-  } catch (err) {
-    if (err.name === 'CastError') {
-      res.status(400).send({
-        message: 'Переданы некорректные данные',
-      });
-      return;
-    }
-    if (err.statusCode === 404) {
-      res.status(404).send({
-        message: 'Карточка не найдена',
-      });
-      return;
-    }
-    res.status(500).send({
-      message: 'Произошла ошибка на сервере',
     });
   }
 };
