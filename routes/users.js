@@ -10,9 +10,9 @@ const {
   userUpdateAvatar,
 } = require('../controllers/users');
 
-usersRoutes.get('/', getUsers);
+usersRoutes.get('/', auth, getUsers);
 
-usersRoutes.get('/me', express.json(), userProfile);
+usersRoutes.get('/me', auth, express.json(), userProfile);
 
 usersRoutes.get('/:userId', auth, getUserByID);
 

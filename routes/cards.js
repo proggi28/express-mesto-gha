@@ -12,7 +12,7 @@ const {
 
 cardsRoutes.get('/', auth, getCards);
 
-cardsRoutes.post('/', express.json(), createCard);
+cardsRoutes.post('/', auth, express.json(), createCard);
 
 cardsRoutes.delete('/:cardId', auth, deleteCardById);
 
