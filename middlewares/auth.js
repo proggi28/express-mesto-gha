@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const ForbiddenError = require('../errors/ForbiddenError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const JWT_SECRET = 'verylongpasswordoftheyandexpraktikumstudent';
 
@@ -7,7 +9,8 @@ module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer')) {
-    return res.status(403).send({ message: 'Необходима авторизация' });
+    next(new ForbiddenError('Необходима авторизация'));
+    return;
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -17,7 +20,7 @@ module.exports = async (req, res, next) => {
   try {
     payload = await jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    next(new UnauthorizedError('Необходима авторизация'));
   }
 
   req.user = payload;

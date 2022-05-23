@@ -31,7 +31,8 @@ const getUserByID = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Невалидный id пользователя'));
-      return;
+    } else {
+      next(err);
     }
     next(err);
   }
@@ -53,11 +54,7 @@ const createUser = async (req, res, next) => {
     res.status(201).send(await user.save());
   } catch (err) {
     if (err.code === 11000) {
-      next(new ConflictError('Пользователь уже существует'));
-      return;
-    }
-    if (err.name === 'ValidationError') {
-      next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+      next(new ConflictError('Данный email уже зарегистрирован'));
       return;
     }
     next(err);

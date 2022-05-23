@@ -55,11 +55,12 @@ const likeCard = async (req, res, next) => {
   try {
     const addLikeCard = await Card.findByIdAndUpdate(
       req.params.cardId,
-      { $addToSet: { likes: req.user.id } }, // добавить _id в массив, если его там нет
+      { $addToSet: { likes: req.user.id } },
       { new: true },
     );
     if (!addLikeCard) {
       next(new NotFoundError('Карточка не найдена'));
+      return;
     }
     res.status(200).send(addLikeCard);
   } catch (err) {
