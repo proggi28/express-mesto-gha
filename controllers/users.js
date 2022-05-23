@@ -44,17 +44,17 @@ const createUser = async (req, res, next) => {
   } = req.body;
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = new User({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
+    const user = await User.create({
+      name, about, avatar, email, password: hash,
     });
-    res.status(201).send(await user.save());
+    res.status(201).send({ data: user });
   } catch (err) {
     if (err.code === 11000) {
       next(new ConflictError('Данный email уже зарегистрирован'));
+      return;
+    }
+    if (err.name === 'ValidationError') {
+      next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       return;
     }
     next(err);

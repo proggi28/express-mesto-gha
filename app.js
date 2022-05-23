@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, errors, Joi } = require('celebrate');
 const bodyParser = require('body-parser');
 const NotFoundError = require('./errors/NotFoundError');
 const { usersRoutes } = require('./routes/users');
@@ -53,6 +53,8 @@ app.use('/cards', cardsRoutes);
 app.use('/', (req, res, next) => {
   next(new NotFoundError('Страница по указанному адресу не найдена'));
 });
+
+app.use(errors());
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
