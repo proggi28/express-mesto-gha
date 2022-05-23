@@ -31,8 +31,6 @@ const getUserByID = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Невалидный id пользователя'));
-    } else {
-      next(err);
     }
     next(err);
   }
@@ -86,7 +84,7 @@ const login = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 const userProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.id);
     return res.status(200).send(user);
   } catch (err) {
     next(new UnauthorizedError('Необходима авторизация'));
