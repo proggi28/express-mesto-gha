@@ -9,21 +9,19 @@ module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer')) {
-    next(new ForbiddenError('Необходима авторизация'));
-    return;
-  }
-
-  const token = authorization.replace('Bearer ', '');
-
-  let payload;
-
-  try {
-    payload = await jwt.verify(token, JWT_SECRET);
-  } catch (err) {
     next(new UnauthorizedError('Необходима авторизация'));
+  } else {
+    const token = authorization.replace('Bearer ', '');
+    let payload;
+
+    try {
+      payload = await jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      next(new ForbiddenError('Необходима авторизация'));
+    }
+
+    req.user = payload;
+
+    next();
   }
-
-  req.user = payload;
-
-  next();
 };

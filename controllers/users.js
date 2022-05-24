@@ -20,6 +20,7 @@ const getUsers = async (req, res, next) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 const getUserByID = async (req, res, next) => {
   try {
     const userById = await User.findById(req.params.userId);
@@ -31,6 +32,7 @@ const getUserByID = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Невалидный id пользователя'));
+      return;
     }
     next(err);
   }
@@ -43,9 +45,15 @@ const createUser = async (req, res, next) => {
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await User.create({
-      name, about, avatar, email, password: hash,
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
     });
-    res.status(201).send({ data: user });
+    const savedUser = await user.save();
+    const { password: removedPassword, ...result } = savedUser.toObject();
+    res.status(201).send(result);
   } catch (err) {
     if (err.code === 11000) {
       next(new ConflictError('Данный email уже зарегистрирован'));
