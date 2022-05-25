@@ -6,6 +6,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { usersRoutes } = require('./routes/users');
 const { cardsRoutes } = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
@@ -45,6 +46,8 @@ app.post(
 
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
+
+app.use(auth);
 
 app.use('/', (req, res, next) => {
   next(new NotFoundError('Страница по указанному адресу не найдена'));

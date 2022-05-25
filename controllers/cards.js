@@ -15,8 +15,7 @@ const getCards = async (req, res, next) => {
 const deleteCardById = async (req, res, next) => {
   try {
     const card = await Card.findById(req.params.cardId);
-    const cardDelById = await Card.findByIdAndRemove(req.params.cardId);
-    if (!cardDelById) {
+    if (!card) {
       next(new NotFoundError('Карточка не найдена'));
       return;
     }
@@ -24,6 +23,7 @@ const deleteCardById = async (req, res, next) => {
       next(new ForbiddenError('Нельзя удалять чужие карточки'));
       return;
     }
+    const cardDelById = await Card.findById(req.params.cardId);
     res.status(200).send(cardDelById);
   } catch (err) {
     if (err.name === 'CastError') {
