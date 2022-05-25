@@ -23,7 +23,7 @@ const deleteCardById = async (req, res, next) => {
       next(new ForbiddenError('Нельзя удалять чужие карточки'));
       return;
     }
-    const cardDelById = await Card.findById(req.params.cardId);
+    const cardDelById = await Card.findByIdAndRemove(req.params.cardId);
     res.status(200).send(cardDelById);
   } catch (err) {
     if (err.name === 'CastError') {
